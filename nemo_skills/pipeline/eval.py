@@ -547,8 +547,12 @@ def eval(
                     installation_command=installation_command,
                     skip_hf_home_check=skip_hf_home_check,
                 )
-                prev_tasks = [new_task]
-                all_tasks.append(new_task)
+                if isinstance(new_task, list):
+                    prev_tasks = new_task
+                    all_tasks.extend(new_task)
+                else:
+                    prev_tasks = [new_task]
+                    all_tasks.append(new_task)
                 # only last dependent job will be here, which is what we want
                 job_id_to_tasks[idx] = prev_tasks
         # scheduling judge jobs if needed

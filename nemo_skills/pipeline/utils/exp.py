@@ -691,15 +691,26 @@ def add_task(
     else:
         if heterogeneous:
             executors[0].het_group_indices = het_group_indices
-        return exp.add(
-            [
-                run.Script(inline=command, metadata=(metadata if idx == 0 else None))
+        if cluster_config["executor"] == "none":
+            return [
+                exp.add(
+                    run.Script(inline=command, metadata=(metadata if idx == 0 else None)),
+                    executor=executors[idx],
+                    name="nemo-run",
+                    dependencies=task_dependencies if idx == 0 else None,
+                )
                 for idx, command in enumerate(commands)
-            ],
-            executor=executors,
-            name="nemo-run",
-            dependencies=task_dependencies,
-        )
+            ]
+        else:
+            return exp.add(
+                [
+                    run.Script(inline=command, metadata=(metadata if idx == 0 else None))
+                    for idx, command in enumerate(commands)
+                ],
+                executor=executors,
+                name="nemo-run",
+                dependencies=task_dependencies,
+            )
 
 
 def run_exp(exp, cluster_config, sequential=False, dry_run=False):
